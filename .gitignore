@@ -1,0 +1,8 @@
+# Output
+/lib
+
+# Visual Studio
+*.suo
+
+# Documentation
+/docs
