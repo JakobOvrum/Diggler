@@ -1,0 +1,3 @@
+[submodule "dirk"]
+	path = dirk
+	url = git://github.com/JakobOvrum/Dirk.git
