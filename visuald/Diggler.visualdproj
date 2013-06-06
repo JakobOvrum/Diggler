@@ -34,21 +34,21 @@
   <useInline>0</useInline>
   <release>0</release>
   <preservePaths>0</preservePaths>
-  <warnings>0</warnings>
-  <infowarnings>0</infowarnings>
+  <warnings>1</warnings>
+  <infowarnings>1</infowarnings>
   <checkProperty>0</checkProperty>
   <genStackFrame>0</genStackFrame>
   <pic>0</pic>
   <cov>0</cov>
   <nofloat>0</nofloat>
-  <Dversion>2.043</Dversion>
+  <Dversion>2</Dversion>
   <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
   <compiler>0</compiler>
   <otherDMD>0</otherDMD>
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
-  <imppath />
+  <imppath>../src ../dirk</imppath>
   <fileImppath />
-  <outdir>$(ConfigurationName)</outdir>
+  <outdir>../lib</outdir>
   <objdir>$(OutDir)</objdir>
   <objname />
   <libname />
@@ -86,7 +86,7 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>$(OutDir)\$(ProjectName).lib</exefile>
+  <exefile>$(OutDir)\diggler-d.lib</exefile>
   <useStdLibPath>1</useStdLibPath>
   <additionalOptions />
   <preBuildCommand />
@@ -127,21 +127,21 @@
   <useInline>0</useInline>
   <release>1</release>
   <preservePaths>0</preservePaths>
-  <warnings>0</warnings>
-  <infowarnings>0</infowarnings>
+  <warnings>1</warnings>
+  <infowarnings>1</infowarnings>
   <checkProperty>0</checkProperty>
   <genStackFrame>0</genStackFrame>
   <pic>0</pic>
   <cov>0</cov>
   <nofloat>0</nofloat>
-  <Dversion>2.043</Dversion>
+  <Dversion>2</Dversion>
   <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
   <compiler>0</compiler>
   <otherDMD>0</otherDMD>
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
-  <imppath />
+  <imppath>../src ../dirk</imppath>
   <fileImppath />
-  <outdir>$(ConfigurationName)</outdir>
+  <outdir>../lib</outdir>
   <objdir>$(OutDir)</objdir>
   <objname />
   <libname />
@@ -179,12 +179,17 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>$(OutDir)\$(ProjectName).lib</exefile>
+  <exefile>$(OutDir)\diggler.lib</exefile>
   <useStdLibPath>1</useStdLibPath>
   <additionalOptions />
   <preBuildCommand />
   <postBuildCommand />
   <filesToClean>*.obj;*.cmd;*.build;*.json;*.dep</filesToClean>
  </Config>
- <Folder name="Diggler" />
+ <Folder name="Diggler">
+  <Folder name="diggler">
+   <File path="..\src\diggler\bot.d" />
+   <File path="..\src\diggler\eventhandler.d" />
+  </Folder>
+ </Folder>
 </DProject>
