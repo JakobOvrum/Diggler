@@ -54,6 +54,7 @@ final class Bot
 
 			this.initialChannels = initialChannels;
 			this.tracker = track(this);
+			this.tracker.start();
 
 			super.onConnect ~= &handleConnect;
 			super.onMessage ~= &handleMessage;
