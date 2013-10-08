@@ -1,7 +1,7 @@
 /// Utilities not related to the bot framework.
 module diggler.util;
 
-string pluralize(string word)(int amount)
+string pluralize(string word)(long amount)
 {
 	static immutable plural = word ~ "s";
 	return amount == 1? word : plural;
