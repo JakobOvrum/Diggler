@@ -1,0 +1,14 @@
+PROJECTNAME = Diggler
+REFERENCETOP = diggler.bot.html
+REPOSRCTREE = http://github.com/JakobOvrum/Diggler/tree/master
+TITLEBARTEXT = <a href="https://github.com/JakobOvrum/Diggler">Github Page</a>
+RESOURCEROOT = bootDoc/
+ISSUETRACKER = https://github.com/JakobOvrum/Diggler/issues/$1
+DEFAULTPACKAGE = diggler
+PACKAGESEP = .
+FAVICON = $(RESOURCEROOT)assets/ico/favicon.ico
+LOGOSRC = $(RESOURCEROOT)assets/img/icon-github.png
+LOGOALT = $(PROJECTNAME)
+LOGOLINK = $(REFERENCETOP)
+COPYRIGHT = Jakob Ovrum
+COPYRIGHTFOOTER = &copy; $(COPYRIGHT) 2013-$(YEAR)

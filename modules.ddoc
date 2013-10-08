@@ -1,0 +1,5 @@
+MODULES = 
+	$(MODULE diggler.attribute)
+	$(MODULE diggler.bot)
+	$(MODULE diggler.context)
+	$(MODULE diggler.command)
