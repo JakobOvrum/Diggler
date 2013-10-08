@@ -1,3 +1,17 @@
+/**
+ * Command framework for IRC bots.
+ *
+ * Groups of commands are bundled as command sets,
+ * which are defined by classes deriving from $(MREF CommandSet).
+ *
+ * All command sets implement the $(MREF ICommandSet) interface,
+ * which presents basic operations for command sets.
+ *
+ * Commands are represented by the $(MREF Command) struct.
+ *
+ * See_Also:
+ *    $(MREF CommandSet)
+ */
 module diggler.command;
 
 import std.array;
@@ -11,12 +25,15 @@ import diggler.util;
 
 import irc.client;
 
+/// Can be thrown by command implementations to signal a problem
+/// with the command arguments.
 class CommandArgumentException : Exception
 {
 	import irc.util : ExceptionConstructor;
 	mixin ExceptionConstructor!();
 }
 
+/// Represents a single command.
 struct Command
 {
 	string name;
@@ -311,19 +328,84 @@ private T parseCommandArgument(T : const(char[])[])(string strArg, string cmdNam
 	return strArg.split();
 }
 
+/**
+ * Basic interface of all command sets.
+ */
 interface ICommandSet
 {
+	/// Human-readable category name for the
+	/// commands in the set.
 	string category() @property @safe pure nothrow;
 
+	/**
+	 * Context for the currently executing command.
+	 * See_Also:
+	 *    $(DPREF context, Context)
+	 */
 	ref Context context() @property @safe pure nothrow;
 
+	/**
+	 * Add the command cmd to the command set.
+	 */
 	void add(ref Command cmd);
 
+	/**
+	 * Lookup a command in this command set by one of its names.
+	 */
 	Command* getCommand(in char[] cmdName);
 
+	/// Sorted list of the primary names of all commands in the
+	/// command set.
 	string[] commandNames() @property @safe;
 }
 
+/**
+ * Base class for command sets.
+ *
+ * Commands are implemented by adding public, non-static methods
+ * to the derived class. Non-public or static methods of the derived
+ * class are ignored.
+ *
+ * The name of the method becomes the primary name
+ * through which the command is invoked in chat. Other names may be added
+ * by tagging the method with the ($D @aliases) ($(DPREF attribute, aliases))
+ * command attribute.
+ *
+ * Commands are invoked by sending a message to a channel the bot
+ * is a member of, where the message starts with the bot's command prefix
+ * followed by the name of the command to invoke. Whitespace-separated words
+ * following the command name are parsed as arguments to the command.
+ *
+ * The arguments to the chat command (whitespace-separated text) map one-to-one
+ * to the parameters of the method. The method's allowed parameter types are:
+ * const or immutable UTF-8 strings, integers and floating point numbers.
+ * 
+ * If the method's last parameter type is a string, then it is passed all the
+ * text passed in chat after the previous arguments, including whitespace.
+ *
+ * If the method's last parameter is an array of strings, then the method
+ * must also be marked typesafe-variadic; the array is filled with all
+ * whitespace-separated arguments passed after arguments to preceding
+ * parameters. If no such arguments are passed, the array is empty.
+ *
+ * Parameters may have default arguments. If a command invocation does not
+ * pass an argument to a parameter with a default argument, the default
+ * argument is used instead.
+ *
+ * If an argument is not passed to a parameter without a default argument,
+ * or a non-integer is passed to an integer parameter or a non-number is
+ * passed to a floating point parameter, then the bot replies with
+ * an error message and the command method is not invoked.
+ *
+ * See $(DPMODULE attribute) for a list of attributes that can be attached
+ * to command methods to alter the behaviour of the command.
+ *
+ * This type subtypes a context object ($(DPREF context, Context)) that
+ * provides contextual operations and information for command implementations.
+ *
+ * Params:
+ *    T = type with command implementation methods. Must be the derived class
+ */
 abstract class CommandSet(T) : ICommandSet
 {
 	private:
@@ -394,6 +476,10 @@ abstract class CommandSet(T) : ICommandSet
 	}
 }
 
+/**
+ * Temporary workaround for compiler bugs as of DMD front-end version 2.063.
+ * This mixin template must be mixed into deriviate classes of $(MREF CommandSet).
+ */
 // TODO: Temporary, figure out various bugs
 mixin template CommandContext()
 {

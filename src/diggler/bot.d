@@ -139,17 +139,17 @@ final class Bot
 	}
 	
 	public:
-	///
+	/// Bot configuration.
 	static struct Configuration
 	{
-		///
+		/// All fields are required.
 		string nick, userName, realName, commandPrefix;
 	}
 
 	/**
 	 * Create a new bot with the given configuration.
 	 *
-	 * If eventLoop is passed, connections by this bot will be handled
+	 * If $(D eventLoop) is passed, connections by this bot will be handled
 	 * by the given event loop. Otherwise, the bot shares a default
 	 * event loop with all other bots created in the same thread.
 	 */
@@ -244,6 +244,9 @@ final class Bot
 
 	/**
 	 * Connect the bot to a network described in the IRC URL url.
+	 *
+	 * The new connection is automatically added to the event loop
+	 * used by this bot.
 	 * Returns:
 	 *    the new connection
 	 */
@@ -288,11 +291,11 @@ final class Bot
 	}
 
 	/**
-	 * Give bot administrator rights to all the users in accountNames,
+	 * Give bot administrator rights to all the users in $(D accountNames),
 	 * by account name.
 	 *
 	 * The account name is the name of the account the user has registered
-	 * with the network's authentication services, such as AuthServ or NickServ.
+	 * with the network's authentication services, such as $(D AuthServ) or $(D NickServ).
 	 *
 	 * Authenticated bot administrators can run commands with the $(D @admin)
 	 * command attribute.
@@ -318,7 +321,7 @@ final class Bot
 	/**
 	 * Convenience method to start an event loop for a bot.
 	 *
-	 * Same as executing $(D bot.eventLoop.run()).
+	 * Same as executing $(D bot.eventLoop._run()).
 	 */
 	void run()
 	{
