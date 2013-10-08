@@ -131,22 +131,27 @@
 </dl>
 <div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="Configuration">&nbsp;</span><a class="symbol-link" href="#Configuration">Configuration</a>;
 </h3></div>
-<div class="declaration-content"><br><br>
+<div class="declaration-content"><dl><p>Bot configuration.</p>
+</dl>
 <div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="nick">&nbsp;</span><a class="symbol-link" href="#nick">nick</a>;
 </h3></div>
-<div class="declaration-content"><br><br>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+</dl>
 </div>
 <hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="userName">&nbsp;</span><a class="symbol-link" href="#userName">userName</a>;
 </h3></div>
-<div class="declaration-content"><br><br>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+</dl>
 </div>
 <hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="realName">&nbsp;</span><a class="symbol-link" href="#realName">realName</a>;
 </h3></div>
-<div class="declaration-content"><br><br>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+</dl>
 </div>
 <hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="commandPrefix">&nbsp;</span><a class="symbol-link" href="#commandPrefix">commandPrefix</a>;
 </h3></div>
-<div class="declaration-content"><br><br>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+</dl>
 </div>
 </div>
 </div>
@@ -155,7 +160,7 @@
 </h3></div>
 <div class="declaration-content"><dl><p>Create a new bot with the given configuration.
 </p>
-<p>If eventLoop is passed, connections by this bot will be handled
+<p>If <span class="inlinecode">eventLoop</span> is passed, connections by this bot will be handled
  by the given event loop. Otherwise, the bot shares a default
  event loop with all other bots created in the same thread.</p>
 </dl>
@@ -212,6 +217,9 @@
 </h3></div>
 <div class="declaration-content"><dl><p>Connect the bot to a network described in the IRC URL <i>url</i>.
 </p>
+<p>The new connection is automatically added to the event loop
+ used by this bot.
+</p>
 <dt>Returns</dt><dd>the new connection</dd>
 </dl>
 </div>
@@ -228,11 +236,11 @@
 <hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="addAdmins">&nbsp;</span><a class="symbol-link" href="#addAdmins">addAdmins</a>(Range)(Range <i>accountNames</i>);
 <br>void <span class="symbol-target" id="addAdmins">&nbsp;</span><a class="symbol-link" href="#addAdmins">addAdmins</a>()(string[] <i>accountNames</i>...);
 </h3></div>
-<div class="declaration-content"><dl><p>Give bot administrator rights to all the users in accountNames,
+<div class="declaration-content"><dl><p>Give bot administrator rights to all the users in <span class="inlinecode">accountNames</span>,
  by account name.
 </p>
 <p>The account name is the name of the account the user has registered
- with the network's authentication services, such as AuthServ or NickServ.
+ with the network's authentication services, such as <span class="inlinecode">AuthServ</span> or <span class="inlinecode">NickServ</span>.
 <br><br>
 
  Authenticated bot administrators can run commands with the <span class="inlinecode">@admin</span>
@@ -243,7 +251,7 @@
 </h3></div>
 <div class="declaration-content"><dl><p>Convenience method to start an event loop for a bot.
 </p>
-<p>Same as executing <span class="inlinecode">bot.eventLoop.<span class="symbol-target" id="run">&nbsp;</span><a class="symbol-link" href="#run">run</a>()</span>.</p>
+<p>Same as executing <span class="inlinecode">bot.eventLoop.run()</span>.</p>
 </dl>
 </div>
 </div>
