@@ -335,6 +335,7 @@ interface ICommandSet
 {
 	/// Human-readable categorical name for the
 	/// commands in the set.
+	/// See_Also: $(DPREF attribute, category)
 	string category() @property @safe pure nothrow;
 
 	/**
@@ -403,7 +404,7 @@ interface ICommandSet
  *
  * This type subtypes a context object ($(DPREF context, Context)) that
  * provides contextual operations and information for
- * command method implementations.
+ * use by command method implementations.
  *
  * Params:
  *    T = type with command implementation methods. Must be the derived class

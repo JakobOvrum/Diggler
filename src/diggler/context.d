@@ -8,12 +8,12 @@ import irc.client;
 import irc.tracker : IrcChannel, IrcTracker;
 
 /**
- * Context for operations used by command methods.
+ * _Context for operations used by command methods.
  *
  * $(DPREF command, CommandSet) subtypes an instance
  * of this type, allowing command methods to access
- * the properties and methods of this without
- * any qualification.
+ * the properties and methods of this type without
+ * any preceding qualification.
  *
  * Some operations are synchronous, non-blocking operations;
  * they may time a significant duration of time to complete,
@@ -146,7 +146,7 @@ struct Context
 		string[] channels;
 
 		/// Boolean whether or not the user is an IRC
-		/// (server or network-wide) operator.
+		/// (server or network-wide) _operator.
 		bool operator = false;
 	}
 
