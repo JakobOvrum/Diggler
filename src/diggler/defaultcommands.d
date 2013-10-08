@@ -44,7 +44,7 @@ final class DefaultCommands : ICommandSet
 				.filter!(set => !set.category)
 				.map!(set => cast(string[])set.commandNames);
 
-			auto numCommands = reduce!((sum, cmds) => sum + cmds.length)(0, miscCommands);
+			auto numCommands = reduce!((sum, cmds) => sum + cmds.length)(0UL, miscCommands);
 
 			if(numCommands != 0)
 			{
