@@ -1,5 +1,5 @@
 PROJECTNAME = Diggler
-REFERENCETOP = diggler.bot.html
+REFERENCETOP = index.html
 REPOSRCTREE = http://github.com/JakobOvrum/Diggler/tree/master
 TITLEBARTEXT = <a href="https://github.com/JakobOvrum/Diggler">Github Page</a>
 RESOURCEROOT = bootDoc/

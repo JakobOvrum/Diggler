@@ -1,0 +1,56 @@
+Ddoc
+$(P Diggler is an IRC bot framework for the D programming language.
+It supports running any number of bots in the same thread,
+each of which can be connected to any number of IRC networks.)
+
+$(P Chat commands are defined in D code in a declarative format
+that leverages compile-time introspection to reap as much information
+from as little source code as possible. Additionally, command
+implementations are executed in fibers (coroutines) to allow for a
+synchronous yet non-blocking interface.)
+
+$(P The following simple, but complete example defines a bot with
+the command $(D !echo) that repeats arguments passed back to the user
+who invoked the command. The bot connects to FreeNode and joins
+the channel #d.irc and uses the nickname "EchoBot".
+If the nickname is taken, it tries "EchoBot_", and continues
+to append underscores until a valid nickname is found.
+The default command $(D !help) is also available, which shows
+information helping users with the available commands.)
+--------------------
+import diggler.bot;
+
+@category("echobot")
+class EchoCommands : CommandSet!EchoCommands
+{
+	mixin CommandContext!();
+
+	@usage("repeat the given text.")
+	void echo(in char[] text)
+	{
+		reply("%s: %s", user.nick, text);
+	}
+}
+
+void main()
+{
+	Bot.Configuration conf;
+	conf.nick = "EchoBot";
+	conf.userName = "dlang";
+	conf.realName = "Diggler bot framework";
+	conf.commandPrefix = "!";
+
+	auto bot = new Bot(conf);
+
+	bot.registerCommands(new EchoCommands);
+
+	auto client = bot.connect("irc://irc.freenode.org/d.irc");
+
+	client.onNickInUse ~= badNick => badNick ~ "_";
+
+	bot.run();
+}
+
+--------------------
+
+$(P Browse the reference documentation for more information.)
