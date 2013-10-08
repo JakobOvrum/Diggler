@@ -19,13 +19,20 @@ import irc.client;
 import irc.eventloop;
 import irc.tracker;
 
-void wakeFiber(IrcEventLoop eventLoop, CommandQueue.CommandFiber fiber)
+package void wakeFiber(IrcEventLoop eventLoop, CommandQueue.CommandFiber fiber)
 {
 	eventLoop.post(() {
 		fiber.resume();
 	});
 }
 
+/**
+ * IRC bot.
+ * 
+ * A single bot can be connected to multiple networks. The bot's
+ * username and real name are shared across all networks, but
+ * the nickname can differ.
+ */
 final class Bot
 {
 	private:
@@ -132,13 +139,27 @@ final class Bot
 	}
 	
 	public:
+	///
 	static struct Configuration
 	{
+		///
 		string nick, userName, realName, commandPrefix;
 	}
 
-	bool allowPMCommands = true;
+	/**
+	 * Create a new bot with the given configuration.
+	 *
+	 * If eventLoop is passed, connections by this bot will be handled
+	 * by the given event loop. Otherwise, the bot shares a default
+	 * event loop with all other bots created in the same thread.
+	 */
+	this(Configuration conf, string file = __FILE__, size_t line = __LINE__)
+	{
+		import diggler.eventloop : defaultEventLoop;
+		this(conf, defaultEventLoop, file, line);
+	}
 
+	/// Ditto
 	this(Configuration conf, IrcEventLoop eventLoop, string file = __FILE__, size_t line = __LINE__)
 	{
 		this._eventLoop = eventLoop;
@@ -153,60 +174,80 @@ final class Bot
 		registerCommands(new DefaultCommands(this));
 	}
 
-	this(Configuration conf, string file = __FILE__, size_t line = __LINE__)
-	{
-		import diggler.eventloop : defaultEventLoop;
-		this(conf, defaultEventLoop, file, line);
-	}
+	/// Boolean whether or not command invocations are allowed in private messages.
+	bool allowPMCommands = true;
 
 	final:
+	/// The event loop handling connections for this bot.
 	IrcEventLoop eventLoop() @property pure nothrow
 	{
 		return _eventLoop;
 	}
 
+	/// The command prefix used to invoke bot commands through chat messages.
 	string commandPrefix() const @property pure nothrow
 	{
 		return _commandPrefix;
 	}
 
+	/// Ditto
 	void commandPrefix(string newPrefix) @property pure nothrow
 	{
 		_commandPrefix = newPrefix;
 	}
 
+	/// The username of this bot.
 	string userName() @property pure nothrow
 	{
 		return _userName;
 	}
 
+	/// The real name of this bot.
 	string realName() @property pure nothrow
 	{
 		return _realName;
 	}
 
+	/// $(D InputRange) of all networks the bot is connected
+	/// to, where each network is represented by its $(D IrcClient) connection.
 	auto clients() @property pure nothrow
 	{
-		return eventHandlers;
+		return eventHandlers.map!((IrcClient client) => client)();
 	}
 
+	/// $(D InputRange) of all command sets ($(DPREF command, ICommandSet))
+	/// registered with the bot.
 	auto commandSets() @property pure nothrow
 	{
 		return _commandSets;
 	}
 
+	/**
+	 * Request a new nickname for the bot on all networks.
+	 *
+	 * The bot may have different nicknames on different networks.
+	 * Use the $(D nick) property on the clients in $(MREF Bot.clients)
+	 * to get the current nicknames.
+	 */
 	void nick(in char[] newNick) @property
 	{
 		foreach(client; clients)
 			client.nick = newNick;
 	}
 
+	/// Ditto
 	void nick(string newNick) @property
 	{
 		foreach(client; clients)
 			client.nick = newNick;
 	}
 
+	/**
+	 * Connect the bot to a network described in the IRC URL url.
+	 * Returns:
+	 *    the new connection
+	 */
+	// TODO: link to Dirk's irc.url in docs
 	IrcClient connect(string url)
 	{
 		import std.socket : getAddress, TcpSocket;
@@ -234,28 +275,51 @@ final class Bot
 		return client;
 	}
 
+	/**
+	 * Register a command set with the bot.
+	 * Params:
+	 *    cmdSet = command set to register
+	 * See_Also:
+	 *    $(DPMODULE command)
+	 */
 	void registerCommands(ICommandSet cmdSet)
 	{
 		_commandSets ~= cmdSet;
 	}
 
-	void addAdmins(Range)(Range range) if(isInputRange!Range && is(ElementType!Range : string))
+	/**
+	 * Give bot administrator rights to all the users in accountNames,
+	 * by account name.
+	 *
+	 * The account name is the name of the account the user has registered
+	 * with the network's authentication services, such as AuthServ or NickServ.
+	 *
+	 * Authenticated bot administrators can run commands with the $(D @admin)
+	 * command attribute.
+	 */
+	void addAdmins(Range)(Range accountNames) if(isInputRange!Range && is(ElementType!Range : string))
 	{
 		auto sortedAdminList = adminList.assumeSorted();
 
-		for(; !range.empty; range.popFront())
+		for(; !accountNames.empty; accountNames.popFront())
 		{
-			auto newAdmin = range.front;
+			auto newAdmin = accountNames.front;
 			auto pivot = sortedAdminList.lowerBound(newAdmin).length;
 			adminList.insertInPlace(pivot, newAdmin);
 		}
 	}
 
+	/// Ditto
 	void addAdmins()(string[] accountNames...)
 	{
 		addAdmins!(string[])(accountNames);
 	}
 
+	/**
+	 * Convenience method to start an event loop for a bot.
+	 *
+	 * Same as executing $(D bot.eventLoop.run()).
+	 */
 	void run()
 	{
 		eventLoop.run();
