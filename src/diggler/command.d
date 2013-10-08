@@ -1,11 +1,11 @@
 /**
  * Command framework for IRC bots.
  *
- * Groups of commands are bundled as command sets,
+ * Groups of commands are bundled as _command sets,
  * which are defined by classes deriving from $(MREF CommandSet).
  *
- * All command sets implement the $(MREF ICommandSet) interface,
- * which presents basic operations for command sets.
+ * All _command sets implement the $(MREF ICommandSet) interface,
+ * which presents basic operations for _command sets.
  *
  * Commands are represented by the $(MREF Command) struct.
  *
@@ -333,14 +333,14 @@ private T parseCommandArgument(T : const(char[])[])(string strArg, string cmdNam
  */
 interface ICommandSet
 {
-	/// Human-readable category name for the
+	/// Human-readable categorical name for the
 	/// commands in the set.
 	string category() @property @safe pure nothrow;
 
 	/**
 	 * Context for the currently executing command.
 	 * See_Also:
-	 *    $(DPREF context, Context)
+	 *    $(DPREF _context, Context)
 	 */
 	ref Context context() @property @safe pure nothrow;
 
@@ -368,16 +368,17 @@ interface ICommandSet
  *
  * The name of the method becomes the primary name
  * through which the command is invoked in chat. Other names may be added
- * by tagging the method with the ($D @aliases) ($(DPREF attribute, aliases))
- * command attribute.
+ * by tagging the method with the $(D @aliases) ($(DPREF attribute, aliases))
+ * command attribute. When the command is invoked through one of its
+ * names, the method is called.
  *
  * Commands are invoked by sending a message to a channel the bot
  * is a member of, where the message starts with the bot's command prefix
  * followed by the name of the command to invoke. Whitespace-separated words
  * following the command name are parsed as arguments to the command.
  *
- * The arguments to the chat command (whitespace-separated text) map one-to-one
- * to the parameters of the method. The method's allowed parameter types are:
+ * The arguments to the chat command map one-to-one to the parameters
+ * of the method. The method's allowed parameter types are:
  * const or immutable UTF-8 strings, integers and floating point numbers.
  * 
  * If the method's last parameter type is a string, then it is passed all the
@@ -395,13 +396,14 @@ interface ICommandSet
  * If an argument is not passed to a parameter without a default argument,
  * or a non-integer is passed to an integer parameter or a non-number is
  * passed to a floating point parameter, then the bot replies with
- * an error message and the command method is not invoked.
+ * an error message and the command method is not called.
  *
  * See $(DPMODULE attribute) for a list of attributes that can be attached
  * to command methods to alter the behaviour of the command.
  *
  * This type subtypes a context object ($(DPREF context, Context)) that
- * provides contextual operations and information for command implementations.
+ * provides contextual operations and information for
+ * command method implementations.
  *
  * Params:
  *    T = type with command implementation methods. Must be the derived class
