@@ -157,7 +157,7 @@ struct Context
 	 * Params:
 	 *    nick = nickname of user to lookup
 	 */
-	WhoisResult whois(in char[] nick)
+	WhoisResult whois(string nick)
 	{
 		WhoisResult result;
 
