@@ -1,0 +1,21 @@
+{
+	"name": "diggler",
+	"description": "IRC bot framework",
+	"authors": ["Jakob Ovrum"],
+	"copyright": "Copyright© Jakob Ovrum 2013",
+	"homepage": "https://github.com/JakobOvrum/Diggler",
+	"license": "MIT",
+
+	"targetType": "library",
+	"targetPath": "lib",
+
+	"sourcePaths": ["src"],
+	"libs": ["phobos"],
+
+	"dependencies": {
+		"dirk": {
+			"version": "~master",
+			"path": "dirk"
+		}
+	}
+}
