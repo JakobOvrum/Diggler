@@ -13,9 +13,6 @@
 	"libs": ["phobos"],
 
 	"dependencies": {
-		"dirk": {
-			"version": "~master",
-			"path": "dirk"
-		}
+		"dirk": "~master"
 	}
 }
