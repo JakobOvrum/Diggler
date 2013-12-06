@@ -416,7 +416,7 @@ abstract class CommandSet(T) : ICommandSet
 	string[] _commandNames; // TODO: Not a static, immutable property because of template bugs (2.063)
 	Context _context;
 
-	void registerCommands(T cmdSet)
+	final void registerCommands(T cmdSet)
 	{
 		foreach(memberName; __traits(derivedMembers, T))
 		{
@@ -441,6 +441,9 @@ abstract class CommandSet(T) : ICommandSet
 		auto cmdSet = enforce(cast(T)this);
 		registerCommands(cmdSet);
 	}
+
+	// See CommandContext
+	//alias context this;
 
 	override: // Implement ICommandSet
 	ref Context context()

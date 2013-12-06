@@ -1,7 +1,5 @@
 module diggler.bot;
 
-import core.thread : Fiber;
-
 import std.algorithm;
 import std.array;
 import std.exception : enforce;
