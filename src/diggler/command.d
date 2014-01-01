@@ -67,7 +67,7 @@ struct Command
 				app ~= "...";
 
 			auto isString = typeName == "string";
-			
+
 			if(defaultArgument)
 			{
 				app ~= " = ";
@@ -115,7 +115,7 @@ struct Command
 		alias Args = FillableParameterTypeTuple!T;
 		alias defaultArgs = ParameterDefaultValueTuple!handler;
 		enum isVariadic = variadicFunctionStyle!handler == Variadic.typesafe;
-		
+
 		void handleCommand(string strArgs) // TODO: code size reduction potential here
 		{
 			import std.algorithm : findSplitBefore;
@@ -125,7 +125,7 @@ struct Command
 			strArgs = strArgs.strip();
 
 			Args args;
-			
+
 			enum firstDefaultArg = computeFirstDefaultArg!(defaultArgs);
 			enum hasDefaultArgs = firstDefaultArg != -1;
 
@@ -137,7 +137,7 @@ struct Command
 			{
 				alias Arg = typeof(arg);
 				enum isLastArgument = i == args.length - 1;
-				
+
 				static if(is(Arg == string[]))
 				{
 					static assert(isLastArgument, fullyQualifiedName!handler ~ `: string[] parameter can only appear at the end of the parameter list`);
@@ -201,7 +201,7 @@ struct Command
 
 		static if(isVariadic)
 			cmd.variadic = true;
-		
+
 		static if(hasAttribute!(handler, .aliases))
 			cmd.aliases = getAttribute!(handler, .aliases).value;
 
@@ -381,7 +381,7 @@ interface ICommandSet
  * The arguments to the chat command map one-to-one to the parameters
  * of the method. The method's allowed parameter types are:
  * const or immutable UTF-8 strings, integers and floating point numbers.
- * 
+ *
  * If the method's last parameter type is a string, then it is passed all the
  * text passed in chat after the previous arguments, including whitespace.
  *
