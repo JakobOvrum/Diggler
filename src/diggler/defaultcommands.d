@@ -1,5 +1,6 @@
 module diggler.defaultcommands;
 
+import diggler.attribute;
 import diggler.bot;
 import diggler.context;
 import diggler.command;
