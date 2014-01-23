@@ -10,7 +10,7 @@
 	"targetPath": "lib",
 
 	"sourcePaths": ["src"],
-	"libs": ["phobos"],
+	"importPaths": ["dirk", "dirk/libev"],
 
 	"dependencies": {
 		"dirk": "~master"
