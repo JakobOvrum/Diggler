@@ -47,7 +47,7 @@ struct Context
 	 *
 	 * Params:
 	 *    ctx = existing context to copy
-	 *    target = channel name or user nickname
+	 *    target = channel name or user nick name
 	 */
 	this(Context ctx, string target)
 	{
@@ -151,11 +151,11 @@ struct Context
 	}
 
 	/**
-	 * Lookup more information about the user for the given nickname.
+	 * Lookup more information about the user for the given nick name.
 	 *
 	 * This is a synchronous but non-blocking operation.
 	 * Params:
-	 *    nick = nickname of user to lookup
+	 *    nick = nick name of user to lookup
 	 */
 	WhoisResult whois(string nick)
 	{
@@ -165,9 +165,9 @@ struct Context
 
 		void onWhoisReply(IrcUser user, in char[] realName)
 		{
-			if(user.nick == nick)
+			if(user.nickName == nick)
 			{
-				result.user = IrcUser(user.nick.idup, user.userName.idup, user.hostName.idup);
+				result.user = IrcUser(user.nickName.idup, user.userName.idup, user.hostName.idup);
 				result.realName = realName.idup;
 				client.onWhoisReply.unsubscribeHandler(&onWhoisReply);
 				_bot.eventLoop.wakeFiber(curFiber);

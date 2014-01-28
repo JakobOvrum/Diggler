@@ -26,10 +26,10 @@ package void wakeFiber(IrcEventLoop eventLoop, CommandQueue.CommandFiber fiber)
 
 /**
  * IRC bot.
- * 
+ *
  * A single bot can be connected to multiple networks. The bot's
  * username and real name are shared across all networks, but
- * the nickname can differ.
+ * the nick name can differ.
  */
 final class Bot
 {
@@ -75,8 +75,8 @@ final class Bot
 		{
 			import std.string : stripLeft;
 
-			bool isPm = target == super.nick;
-			auto replyTarget = (isPm? user.nick : target).idup;
+			bool isPm = target == super.nickName;
+			auto replyTarget = (isPm? user.nickName : target).idup;
 
 			// handle commands
 			if(message.startsWith(commandPrefix))
@@ -106,7 +106,7 @@ final class Bot
 					return;
 
 				//enforce(cmdSearch.empty, format(`multiple handlers for command "%s"`, cmdName));
-				
+
 				auto cmdArgs = msg.stripLeft().idup;
 
 				auto ctx = Context(this.outer, this, tracker, replyTarget, user, isPm);
@@ -122,7 +122,7 @@ final class Bot
 					}
 					/+catch(Exception e)
 					{
-						debug client.sendf(user.nick, e.toString());
+						debug client.sendf(user.nickName, e.toString());
 						else
 							throw e;
 					}+/
@@ -135,13 +135,14 @@ final class Bot
 	{
 		return _commandQueue;
 	}
-	
+
 	public:
 	/// Bot configuration.
 	static struct Configuration
 	{
 		/// All fields are required.
-		string nick, userName, realName, commandPrefix;
+		string nickName, userName, realName, commandPrefix;
+		deprecated alias nick = nickName;
 	}
 
 	/**
@@ -163,7 +164,7 @@ final class Bot
 		this._eventLoop = eventLoop;
 
 		this.commandPrefix = enforce(conf.commandPrefix, "must specify command prefix", file, line);
-		this.preferredNick = enforce(conf.nick, "must specify nick name", file, line);
+		this.preferredNick = enforce(conf.nickName, "must specify nick name", file, line);
 		this._userName = enforce(conf.userName, "must specify user name", file, line);
 		this._realName = enforce(conf.realName, "must specify the real name field", file, line);
 
@@ -221,24 +222,26 @@ final class Bot
 	}
 
 	/**
-	 * Request a new nickname for the bot on all networks.
+	 * Request a new nick name for the bot on all networks.
 	 *
-	 * The bot may have different nicknames on different networks.
+	 * The bot may have different nick names on different networks.
 	 * Use the $(D nick) property on the clients in $(MREF Bot.clients)
-	 * to get the current nicknames.
+	 * to get the current nick names.
 	 */
-	void nick(in char[] newNick) @property
+	void nickName(in char[] newNick) @property
 	{
 		foreach(client; clients)
-			client.nick = newNick;
+			client.nickName = newNick;
 	}
 
 	/// Ditto
-	void nick(string newNick) @property
+	void nickName(string newNick) @property
 	{
 		foreach(client; clients)
-			client.nick = newNick;
+			client.nickName = newNick;
 	}
+
+	deprecated alias nick = nickName;
 
 	/**
 	 * Connect the bot to a network described in the IRC URL url.
@@ -261,10 +264,10 @@ final class Bot
 		auto af = address.addressFamily;
 
 		auto socket = info.secure? new SslSocket(af) : new TcpSocket(af);
-		
+
 		auto client = new ClientEventHandler(socket, info.channels);
 
-		client.nick = preferredNick;
+		client.nickName = preferredNick;
 		client.userName = userName;
 		client.realName = realName;
 
