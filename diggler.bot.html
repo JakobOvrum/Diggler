@@ -130,6 +130,151 @@
  username and real name are shared across all networks, but
  the nick name can differ.</p>
 </dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="Configuration">&nbsp;</span><a class="symbol-link" href="#Configuration">Configuration</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>Bot configuration.</p>
+
+</dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="nickName">&nbsp;</span><a class="symbol-link" href="#nickName">nickName</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="userName">&nbsp;</span><a class="symbol-link" href="#userName">userName</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="realName">&nbsp;</span><a class="symbol-link" href="#realName">realName</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="commandPrefix">&nbsp;</span><a class="symbol-link" href="#commandPrefix">commandPrefix</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>All fields are required.</p>
+
+</dl>
+</div>
+</div>
+</div>
+<hr><div class="row-fluid declaration"><h3> this(Configuration <i>conf</i>, string <i>file</i> = __FILE__, size_t <i>line</i> = __LINE__);
+<br> this(Configuration <i>conf</i>, IrcEventLoop <i>eventLoop</i>, string <i>file</i> = __FILE__, size_t <i>line</i> = __LINE__);
+</h3></div>
+<div class="declaration-content"><dl><p>Create a new bot with the given configuration.
+</p>
+
+<p>If <span class="inlinecode">eventLoop</span> is passed, connections by this bot will be handled
+ by the given event loop. Otherwise, the bot shares a default
+ event loop with all other bots created in the same thread.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>bool <span class="symbol-target" id="allowPMCommands">&nbsp;</span><a class="symbol-link" href="#allowPMCommands">allowPMCommands</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>Boolean whether or not command invocations are allowed in private messages.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final pure nothrow @property IrcEventLoop <span class="symbol-target" id="eventLoop">&nbsp;</span><a class="symbol-link" href="#eventLoop">eventLoop</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>The event loop handling connections for this bot.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final const pure nothrow @property string <span class="symbol-target" id="commandPrefix">&nbsp;</span><a class="symbol-link" href="#commandPrefix">commandPrefix</a>();
+<br>final pure nothrow @property void <span class="symbol-target" id="commandPrefix">&nbsp;</span><a class="symbol-link" href="#commandPrefix">commandPrefix</a>(string <i>newPrefix</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>The command prefix used to invoke bot commands through chat messages.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final pure nothrow @property string <span class="symbol-target" id="userName">&nbsp;</span><a class="symbol-link" href="#userName">userName</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>The username of this bot.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final pure nothrow @property string <span class="symbol-target" id="realName">&nbsp;</span><a class="symbol-link" href="#realName">realName</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>The real name of this bot.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final pure nothrow @property auto <span class="symbol-target" id="clients">&nbsp;</span><a class="symbol-link" href="#clients">clients</a>();
+</h3></div>
+<div class="declaration-content"><dl><p><span class="inlinecode">InputRange</span> of all networks the bot is connected
+ to, where each network is represented by its <span class="inlinecode">IrcClient</span> connection.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final pure nothrow @property auto <span class="symbol-target" id="commandSets">&nbsp;</span><a class="symbol-link" href="#commandSets">commandSets</a>();
+</h3></div>
+<div class="declaration-content"><dl><p><span class="inlinecode">InputRange</span> of all command sets (<a href="diggler.command.html#ICommandSet"><span class="inlinecode">diggler.command.ICommandSet</span></a>)
+ registered with the bot.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final @property void <span class="symbol-target" id="nickName">&nbsp;</span><a class="symbol-link" href="#nickName">nickName</a>(in char[] <i>newNick</i>);
+<br>final @property void <span class="symbol-target" id="nickName">&nbsp;</span><a class="symbol-link" href="#nickName">nickName</a>(string <i>newNick</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Request a new nick name for the bot on all networks.
+</p>
+
+<p>The bot may have different nick names on different networks.
+ Use the <span class="inlinecode">nick</span> property on the clients in <a class="symbol-link" href="#Bot.clients"><span class="inlinecode">Bot.clients</span></a>
+ to get the current nick names.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final IrcClient <span class="symbol-target" id="connect">&nbsp;</span><a class="symbol-link" href="#connect">connect</a>(string <i>url</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Connect the bot to a network described in the IRC URL <i>url</i>.
+</p>
+
+<p>The new connection is automatically added to the event loop
+ used by this bot.
+</p>
+<dt>Returns</dt><dd>the new connection</dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final void <span class="symbol-target" id="registerCommands">&nbsp;</span><a class="symbol-link" href="#registerCommands">registerCommands</a>(ICommandSet <i>cmdSet</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Register a command set with the bot.
+</p>
+
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ICommandSet <i>cmdSet</i></td>
+<td>command set to register</td>
+</tr>
+</table></dd>
+<dt>See Also</dt><dd><a href="diggler.command.html"><span class="inlinecode">diggler.command</span></a></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="addAdmins">&nbsp;</span><a class="symbol-link" href="#addAdmins">addAdmins</a>(Range)(Range <i>accountNames</i>) if (isInputRange!Range &amp;&amp; is(ElementType!Range : string));
+<br>void <span class="symbol-target" id="addAdmins">&nbsp;</span><a class="symbol-link" href="#addAdmins">addAdmins</a>()(string[] <i>accountNames</i>...);
+</h3></div>
+<div class="declaration-content"><dl><p>Give bot administrator rights to all the users in <span class="inlinecode">accountNames</span>,
+ by account name.
+</p>
+
+<p>The account name is the name of the account the user has registered
+ with the network's authentication services, such as <span class="inlinecode">AuthServ</span> or <span class="inlinecode">NickServ</span>.
+<br><br>
+
+ Authenticated bot administrators can run commands with the <span class="inlinecode">@admin</span>
+ command attribute.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>final void <span class="symbol-target" id="run">&nbsp;</span><a class="symbol-link" href="#run">run</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Convenience method to start an event loop for a bot.
+</p>
+
+<p>Same as executing <span class="inlinecode">bot.eventLoop.run()</span>.</p>
+</dl>
+</div>
+</div>
 </div>
 
 

@@ -137,6 +137,127 @@
  but they do not block the thread from handling other events,
  such as other command invocations.</p>
 </dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3> this(Context <i>ctx</i>, string <i>target</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Create a new context from an existing one,
+ but with a different originating channel/user.
+</p>
+
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Context <i>ctx</i></td>
+<td>existing context to copy</td>
+</tr>
+<tr><td>string <i>target</i></td>
+<td>channel name or user nick name</td>
+</tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @property Bot <span class="symbol-target" id="bot">&nbsp;</span><a class="symbol-link" href="#bot">bot</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>The current <span class="symbol-target" id="bot">&nbsp;</span><a class="symbol-link" href="#bot">bot</a>.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @property ref const(IrcUser) <span class="symbol-target" id="user">&nbsp;</span><a class="symbol-link" href="#user">user</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>The user that invoked the command.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>@property IrcChannel <span class="symbol-target" id="channel">&nbsp;</span><a class="symbol-link" href="#channel">channel</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>The channel the command was invoked in.
+</p>
+
+<p>Throws an exception if the command originated from
+ a private message.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @property bool <span class="symbol-target" id="isPrivateMessage">&nbsp;</span><a class="symbol-link" href="#isPrivateMessage">isPrivateMessage</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Boolean whether or not the command was invoked
+ from a private message.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="reply">&nbsp;</span><a class="symbol-link" href="#reply">reply</a>(FmtArgs...)(in char[] <i>fmt</i>, FmtArgs <i>fmtArgs</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Reply to the channel in which the command was invoked.
+ If there is more than one argument, the first argument
+ is formatted with subsequent ones.
+</p>
+
+<p>If the command originated in a private message,
+ the reply is sent to the invoking user as a private message.
+</p>
+<dt>See Also</dt><dd><a href="http://dlang.org/phobos/std_format.html#formattedWrite"><span class="inlinecode">std.format.formattedWrite</span></a></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="wait">&nbsp;</span><a class="symbol-link" href="#wait">wait</a>(double <i>time</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Wait the given length of <i>time</i> before returning.
+</p>
+
+<p>This is a synchronous but non-blocking operation.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="WhoisResult">&nbsp;</span><a class="symbol-link" href="#WhoisResult">WhoisResult</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>Result of <a class="symbol-link" href="#Context.whois"><span class="inlinecode">Context.whois</span></a>.</p>
+
+</dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>IrcUser <span class="symbol-target" id="user">&nbsp;</span><a class="symbol-link" href="#user">user</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>Nickname, username and hostname of the user.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>string <span class="symbol-target" id="realName">&nbsp;</span><a class="symbol-link" href="#realName">realName</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>Real name of the user.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>string[] <span class="symbol-target" id="channels">&nbsp;</span><a class="symbol-link" href="#channels">channels</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>Channels the user is currently a member of.</p>
+
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>bool <span class="symbol-target" id="operator">&nbsp;</span><a class="symbol-link" href="#operator">operator</a>;
+</h3></div>
+<div class="declaration-content"><dl><p>Boolean whether or not the user is an IRC
+ (server or network-wide) operator.</p>
+
+</dl>
+</div>
+</div>
+</div>
+<hr><div class="row-fluid declaration"><h3>WhoisResult <span class="symbol-target" id="whois">&nbsp;</span><a class="symbol-link" href="#whois">whois</a>(string <i>nick</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Lookup more information about the user for the given <i>nick</i> name.
+</p>
+
+<p>This is a synchronous but non-blocking operation.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>string <i>nick</i></td>
+<td><i>nick</i> name of user to lookup</td>
+</tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="quit">&nbsp;</span><a class="symbol-link" href="#quit">quit</a>(in char[] <i>msg</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Disconnect from the current network with the given message.
+</p>
+
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>char[] <i>msg</i></td>
+<td>comment sent in quit notification</td>
+</tr>
+</table></dd>
+</dl>
+</div>
+</div>
 </div>
 
 
