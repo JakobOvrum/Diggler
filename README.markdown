@@ -13,7 +13,7 @@ Directory Structure
 
 Dependencies
 ============================================
-Diggler depends on (Dirk)[https://github.com/JakobOvrum/Dirk] which depends on [libev](http://software.schmorp.de/pkg/libev.html). For Debian and deriviates, that's the `libev-dev` package.
+Diggler depends on [Dirk](https://github.com/JakobOvrum/Dirk) which depends on [libev](http://software.schmorp.de/pkg/libev.html). For Debian and deriviates, that's the `libev-dev` package.
 
 [Documentation](http://jakobovrum.github.io/Diggler/)
 ============================================
