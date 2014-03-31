@@ -11,9 +11,13 @@ Directory Structure
  * `visuald` - [VisualD](http://www.dsource.org/projects/visuald) project files.
  * `lib` - Diggler library files (when built).
 
-[Documentation](http://jakobovrum.github.com/Diggler/)
+Dependencies
 ============================================
-You can find automatically generated documentation on the [gh-pages](https://github.com/JakobOvrum/Diggler/tree/gh-pages) branch, or you can [browse it online](http://jakobovrum.github.com/Diggler/).
+Diggler depends on (Dirk)[https://github.com/JakobOvrum/Dirk] which depends on [libev](http://software.schmorp.de/pkg/libev.html). For Debian and deriviates, that's the `libev-dev` package.
+
+[Documentation](http://jakobovrum.github.io/Diggler/)
+============================================
+You can find automatically generated documentation on the [gh-pages](https://github.com/JakobOvrum/Diggler/tree/gh-pages) branch, or you can [browse it online](http://jakobovrum.github.io/Diggler/).
 
 License
 ============================================
