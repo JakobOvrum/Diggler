@@ -12,6 +12,7 @@ public import diggler.context;
 public import diggler.command;
 import diggler.commandqueue;
 import diggler.defaultcommands;
+import diggler.tracker;
 
 import irc.client;
 import irc.eventloop;
@@ -39,7 +40,7 @@ final class Bot
 	ClientEventHandler[] eventHandlers;
 	ICommandSet[] _commandSets;
 
-	string[] adminList; // Sorted
+	Admin[] adminList; // Sorted
 
 	string preferredNick; // Nick can differ across connections
 	string _userName;
@@ -47,9 +48,9 @@ final class Bot
 	string _commandPrefix;
 
 	package:
-	final class ClientEventHandler : IrcClient
+	final class ClientEventHandler : IrcClient // Rename to `Network`?
 	{
-		IrcTracker tracker;
+		BotTracker tracker;
 		string[] initialChannels;
 		IrcUser[string] adminCache;
 
@@ -58,7 +59,7 @@ final class Bot
 			super(socket);
 
 			this.initialChannels = initialChannels;
-			this.tracker = track(this);
+			this.tracker = new BotTracker(this);
 			this.tracker.start();
 
 			super.onConnect ~= &handleConnect;
@@ -110,6 +111,9 @@ final class Bot
 				auto cmdArgs = msg.stripLeft().idup;
 
 				auto ctx = Context(this.outer, this, tracker, replyTarget, user, isPm);
+
+				if(cmd.adminOnly && !ctx.isAdmin(user))
+					return;
 
 				commandQueue.post(cmdSet, ctx, () {
 					try cmd.handler(cmdArgs);
@@ -252,6 +256,7 @@ final class Bot
 	 *    the new connection
 	 */
 	// TODO: link to Dirk's irc.url in docs
+	// TODO: try all address results, not just the first
 	IrcClient connect(string url)
 	{
 		import std.socket : getAddress, TcpSocket;
@@ -292,31 +297,64 @@ final class Bot
 	}
 
 	/**
-	 * Give bot administrator rights to all the users in $(D accountNames),
-	 * by account name.
-	 *
-	 * The account name is the name of the account the user has registered
-	 * with the network's authentication services, such as $(D AuthServ) or $(D NickServ).
+	 * Represents a bot administrator.
 	 *
 	 * Authenticated bot administrators can run commands with the $(D @admin)
 	 * command attribute.
+	 *
+	 * Both the nick name and the account name need to match for a user to be
+	 * considered an administrator.
+	 *
+	 * See_Also:
+	 *   $(MREF Bot.addAdmins)
 	 */
-	void addAdmins(Range)(Range accountNames) if(isInputRange!Range && is(ElementType!Range : string))
+	struct Admin
+	{
+		/// Nick name of administrator.
+		string nickName;
+
+		/**
+		 * Account name of administrator.
+		 *
+		 * The account name is the name of the account the user
+		 * has registered with the network's authentication services,
+		 * such as $(D AuthServ) or $(D NickServ).
+		 */
+		string accountName;
+
+		int opCmp(ref const Admin other) const
+		{
+			import std.algorithm : cmp;
+			auto diff = cmp(nickName, other.nickName);
+			return diff == 0 ? cmp(accountName, other.accountName) : diff;
+		}
+	}
+
+	/**
+	 * Give bot administrator rights to all the users in $(D admins).
+	 * See_Also:
+	 *   $(MREF Bot.Admin)
+	 */
+	void addAdmins(Range)(Range admins) if(isInputRange!Range && is(Unqual!(ElementType!Range) == Admin))
 	{
 		auto sortedAdminList = adminList.assumeSorted();
 
-		for(; !accountNames.empty; accountNames.popFront())
+		for(; !admins.empty; admins.popFront())
 		{
-			auto newAdmin = accountNames.front;
-			auto pivot = sortedAdminList.lowerBound(newAdmin).length;
-			adminList.insertInPlace(pivot, newAdmin);
+			Admin newAdmin = admins.front;
+			auto lowerBound = sortedAdminList.lowerBound(newAdmin);
+			if(lowerBound.length == adminList.length || lowerBound.front != newAdmin)
+			{
+				auto pivot = lowerBound.length;
+				adminList.insertInPlace(pivot, newAdmin);
+			}
 		}
 	}
 
 	/// Ditto
-	void addAdmins()(string[] accountNames...)
+	void addAdmins()(in Admin[] admins...)
 	{
-		addAdmins!(string[])(accountNames);
+		addAdmins!(const(Admin)[])(admins);
 	}
 
 	/**
@@ -328,4 +366,23 @@ final class Bot
 	{
 		eventLoop.run();
 	}
+}
+
+unittest
+{
+	import std.algorithm : canFind;
+
+	Bot.Configuration conf;
+	conf.nickName = "test";
+	conf.userName = "test";
+	conf.realName = "Test";
+	conf.commandPrefix = "!";
+	auto bot = new Bot(conf);
+
+	bot.addAdmins(Bot.Admin("test", "Test"));
+	assert(bot.adminList == [Bot.Admin("test", "Test")]);
+	bot.addAdmins(Bot.Admin("test", "Test"), Bot.Admin("other", "Other"), Bot.Admin("test", "Test"));
+	assert(bot.adminList == [Bot.Admin("other", "Other"), Bot.Admin("test", "Test")]);
+	bot.addAdmins([Bot.Admin("other", "Test")]);
+	assert(bot.adminList == [Bot.Admin("other", "Other"), Bot.Admin("other", "Test"), Bot.Admin("test", "Test")]);
 }

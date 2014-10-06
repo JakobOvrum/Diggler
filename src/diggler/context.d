@@ -3,9 +3,10 @@ module diggler.context;
 import std.array;
 
 import diggler.bot;
+import diggler.tracker;
 
 import irc.client;
-import irc.tracker : IrcChannel, IrcTracker;
+import irc.tracker : IrcTracker, TrackedChannel;
 
 /**
  * _Context for operations used by command methods.
@@ -31,7 +32,7 @@ struct Context
 	bool isPm;
 
 	public:
-	this(Bot _bot, Bot.ClientEventHandler client, IrcTracker tracker, string target, ref IrcUser _user, bool isPm)
+	this(Bot _bot, Bot.ClientEventHandler client, BotTracker tracker, string target, ref IrcUser _user, bool isPm)
 	{
 		this._bot = _bot;
 		this.client = client;
@@ -85,12 +86,12 @@ struct Context
 	 * Throws an exception if the command originated from
 	 * a private message.
 	 */
-	IrcChannel channel() @property
+	TrackedChannel channel() @property
 	{
 		if(isPm)
 			throw new Exception("not in a channel");
 
-		return tracker[target];
+		return *tracker.findChannel(target);
 	}
 
 	/**
@@ -155,9 +156,10 @@ struct Context
 	 *
 	 * This is a synchronous but non-blocking operation.
 	 * Params:
-	 *    nick = nick name of user to lookup
+	 *    nickName = nick name of user to lookup
 	 */
-	WhoisResult whois(string nick)
+	// TODO: handle error response and timeout
+	WhoisResult whois(string nickName)
 	{
 		WhoisResult result;
 
@@ -165,27 +167,55 @@ struct Context
 
 		void onWhoisReply(IrcUser user, in char[] realName)
 		{
-			if(user.nickName == nick)
+			if(user.nickName == nickName)
 			{
+				client.onWhoisReply.unsubscribeHandler(&onWhoisReply);
 				result.user = IrcUser(user.nickName.idup, user.userName.idup, user.hostName.idup);
 				result.realName = realName.idup;
-				client.onWhoisReply.unsubscribeHandler(&onWhoisReply);
 				_bot.eventLoop.wakeFiber(curFiber);
 			}
 		}
 
 		client.onWhoisReply ~= &onWhoisReply;
-
-		client.queryWhois(nick);
-
+		client.queryWhois(nickName);
 		curFiber.yield();
 
 		return result;
 	}
 
-	version(none) bool isAdmin(in char[] nickName)
+	bool isAdmin(string nickName)
 	{
+		auto sortedAdminList = bot.adminList.assumeSorted!((a, b) => a.nickName < b.nickName)();
+		auto accounts = sortedAdminList.equalRange(Bot.Admin(nickName));
+		if(accounts.empty)
+			return false;
 
+		if(auto user = tracker.findUser(nickName))
+		{
+			if(user.payload.isAdmin)
+				return true;
+
+			auto curFiber = _bot.commandQueue.fiber();
+			bool result = false;
+
+			void onWhoisAccountReply(in char[] nick, in char[] accountName)
+			{
+				if(nick == nickName)
+				{
+					client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
+					auto sortedAdminList = bot.adminList.assumeSorted!((a, b) => a.nickName < b.nickName)();
+					result = sortedAdminList.contains(Bot.Admin(nickName, cast(immutable)accountName));
+				}
+			}
+
+			client.onWhoisAccountReply ~= &onWhoisAccountReply;
+			client.queryWhois(nickName);
+			curFiber.yield();
+
+			return result;
+		}
+		else
+			return false;
 	}
 
 	/**
