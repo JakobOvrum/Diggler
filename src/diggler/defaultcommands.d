@@ -69,7 +69,18 @@ final class DefaultCommands : ICommandSet
 
 					immutable description = cmd.usage? cmd.usage : "no description available.";
 
-					reply(`%s %s: %s`, names, paramSummary, description);
+					string flags;
+					if(cmd.channelOnly && cmd.adminOnly)
+						flags = " [channel, admin]";
+					else if(cmd.channelOnly)
+						flags = " [channel]";
+					else if(cmd.adminOnly)
+						flags = " [admin]";
+					else
+						flags = "";
+
+					reply(`%s %s: %s%s`, names, paramSummary, description, flags);
+
 					return; // Shouldn't be any duplicates
 				}
 			}

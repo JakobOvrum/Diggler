@@ -10,10 +10,8 @@ string pluralize(string word)(long amount)
 // Attributes
 private template isAttribute(Attribute)
 {
-	template isAttribute(alias other)
-	{
-		enum isAttribute = is(typeof(other) == Attribute);
-	}
+	enum isAttribute(alias other) = is(typeof(other) == Attribute);
+	enum isAttribute(Other) = is(Other == Attribute);
 }
 
 template hasAttribute(alias sym, Attribute)

@@ -26,7 +26,7 @@ struct Context
 	private:
 	Bot _bot;
 	Bot.ClientEventHandler client;
-	IrcTracker tracker;
+	BotTracker tracker;
 	string target;
 	IrcUser _user;
 	bool isPm;
@@ -183,6 +183,7 @@ struct Context
 		return result;
 	}
 
+	// TODO: handle timeout
 	bool isAdmin(string nickName)
 	{
 		auto sortedAdminList = bot.adminList.assumeSorted!((a, b) => a.nickName < b.nickName)();
@@ -205,10 +206,22 @@ struct Context
 					client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
 					auto sortedAdminList = bot.adminList.assumeSorted!((a, b) => a.nickName < b.nickName)();
 					result = sortedAdminList.contains(Bot.Admin(nickName, cast(immutable)accountName));
+					_bot.eventLoop.wakeFiber(curFiber);
+				}
+			}
+
+			void onWhoisEnd(in char[] nick)
+			{
+				if(nick == nickName)
+				{
+					client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
+					client.onWhoisEnd.unsubscribeHandler(&onWhoisEnd);
+					_bot.eventLoop.wakeFiber(curFiber);
 				}
 			}
 
 			client.onWhoisAccountReply ~= &onWhoisAccountReply;
+			client.onWhoisEnd ~= &onWhoisEnd;
 			client.queryWhois(nickName);
 			curFiber.yield();
 

@@ -40,14 +40,14 @@ final class Bot
 	ClientEventHandler[] eventHandlers;
 	ICommandSet[] _commandSets;
 
-	Admin[] adminList; // Sorted
-
 	string preferredNick; // Nick can differ across connections
 	string _userName;
 	string _realName;
 	string _commandPrefix;
 
 	package:
+	Admin[] adminList; // Sorted
+
 	final class ClientEventHandler : IrcClient // Rename to `Network`?
 	{
 		BotTracker tracker;
@@ -76,9 +76,6 @@ final class Bot
 		{
 			import std.string : stripLeft;
 
-			bool isPm = target == super.nickName;
-			auto replyTarget = (isPm? user.nickName : target).idup;
-
 			// handle commands
 			if(message.startsWith(commandPrefix))
 			{
@@ -103,19 +100,21 @@ final class Bot
 				if(cmdSet is null)
 					return; // No such command
 
+				bool isPm = target == super.nickName;
 				if(isPm && cmd.channelOnly)
 					return;
 
-				//enforce(cmdSearch.empty, format(`multiple handlers for command "%s"`, cmdName));
-
+				// TODO: smarter allocation
 				auto cmdArgs = msg.stripLeft().idup;
-
-				auto ctx = Context(this.outer, this, tracker, replyTarget, user, isPm);
-
-				if(cmd.adminOnly && !ctx.isAdmin(user))
-					return;
+				auto immNick = user.nickName.idup;
+				auto immUser = IrcUser(immNick, user.userName.idup, user.hostName.idup);
+				auto replyTarget = isPm? immNick : target.idup;
+				auto ctx = Context(this.outer, this, tracker, replyTarget, immUser, isPm);
 
 				commandQueue.post(cmdSet, ctx, () {
+					if(cmd.adminOnly && !ctx.isAdmin(immNick))
+						return;
+
 					try cmd.handler(cmdArgs);
 					catch(CommandArgumentException e)
 					{
