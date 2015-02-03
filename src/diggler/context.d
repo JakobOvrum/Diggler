@@ -25,7 +25,7 @@ struct Context
 {
 	private:
 	Bot _bot;
-	Bot.ClientEventHandler client;
+	Bot.ClientEventHandler _client;
 	BotTracker tracker;
 	string target;
 	IrcUser _user;
@@ -35,7 +35,7 @@ struct Context
 	this(Bot _bot, Bot.ClientEventHandler client, BotTracker tracker, string target, ref IrcUser _user, bool isPm)
 	{
 		this._bot = _bot;
-		this.client = client;
+		this._client = client;
 		this.tracker = tracker;
 		this.target = target;
 		this._user = _user;
@@ -72,6 +72,12 @@ struct Context
 	Bot bot() @property pure nothrow
 	{
 		return _bot;
+	}
+
+	/// The current network.
+	IrcClient network() @property pure nothrow
+	{
+		return _client;
 	}
 
 	/// The _user that invoked the command.
@@ -115,7 +121,7 @@ struct Context
 	 */
 	void reply(FmtArgs...)(in char[] fmt, FmtArgs fmtArgs)
 	{
-		client.sendf(target, fmt, fmtArgs);
+		_client.sendf(target, fmt, fmtArgs);
 	}
 
 	/**
@@ -169,15 +175,15 @@ struct Context
 		{
 			if(user.nickName == nickName)
 			{
-				client.onWhoisReply.unsubscribeHandler(&onWhoisReply);
+				_client.onWhoisReply.unsubscribeHandler(&onWhoisReply);
 				result.user = IrcUser(user.nickName.idup, user.userName.idup, user.hostName.idup);
 				result.realName = realName.idup;
 				_bot.eventLoop.wakeFiber(curFiber);
 			}
 		}
 
-		client.onWhoisReply ~= &onWhoisReply;
-		client.queryWhois(nickName);
+		_client.onWhoisReply ~= &onWhoisReply;
+		_client.queryWhois(nickName);
 		curFiber.yield();
 
 		return result;
@@ -203,7 +209,7 @@ struct Context
 			{
 				if(nick == nickName)
 				{
-					client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
+					_client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
 					auto sortedAdminList = bot.adminList.assumeSorted!((a, b) => a.nickName < b.nickName)();
 					result = sortedAdminList.contains(Bot.Admin(nickName, cast(immutable)accountName));
 					_bot.eventLoop.wakeFiber(curFiber);
@@ -214,15 +220,15 @@ struct Context
 			{
 				if(nick == nickName)
 				{
-					client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
-					client.onWhoisEnd.unsubscribeHandler(&onWhoisEnd);
+					_client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
+					_client.onWhoisEnd.unsubscribeHandler(&onWhoisEnd);
 					_bot.eventLoop.wakeFiber(curFiber);
 				}
 			}
 
-			client.onWhoisAccountReply ~= &onWhoisAccountReply;
-			client.onWhoisEnd ~= &onWhoisEnd;
-			client.queryWhois(nickName);
+			_client.onWhoisAccountReply ~= &onWhoisAccountReply;
+			_client.onWhoisEnd ~= &onWhoisEnd;
+			_client.queryWhois(nickName);
 			curFiber.yield();
 
 			return result;
@@ -238,6 +244,6 @@ struct Context
 	 */
 	void quit(in char[] msg)
 	{
-		client.quit(msg);
+		_client.quit(msg);
 	}
 }
