@@ -10,7 +10,7 @@
 	"targetPath": "lib",
 
 	"sourcePaths": ["src"],
-	"importPaths": ["src", "dirk", "dirk/libev"],
+	"importPaths": ["src"],
 
 	"dependencies": {
 		"dirk": "~master"
