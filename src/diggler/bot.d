@@ -101,7 +101,7 @@ final class Bot
 					return; // No such command
 
 				bool isPm = target == super.nickName;
-				if(isPm && cmd.channelOnly)
+				if(isPm && (cmd.channelOnly || !allowPMCommands))
 					return;
 
 				// TODO: smarter allocation
@@ -177,6 +177,7 @@ final class Bot
 	}
 
 	/// Boolean whether or not command invocations are allowed in private messages.
+	/// Enabled by default.
 	bool allowPMCommands = true;
 
 	final:
