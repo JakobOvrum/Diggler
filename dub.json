@@ -13,6 +13,6 @@
 	"importPaths": ["src"],
 
 	"dependencies": {
-		"dirk": "~master"
+		"dirk": "~>0.1"
 	}
 }
