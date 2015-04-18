@@ -252,12 +252,15 @@ final class Bot
 	 *
 	 * The new connection is automatically added to the event loop
 	 * used by this bot.
+	 * Params:
+	 *    url = URL containing information about server, port, SSL and more
+	 *    serverPassword = password to server, or $(D null) to specify no password
 	 * Returns:
 	 *    the new connection
 	 */
 	// TODO: link to Dirk's irc.url in docs
 	// TODO: try all address results, not just the first
-	IrcClient connect(string url)
+	IrcClient connect(string url, in char[] serverPassword)
 	{
 		import std.socket : getAddress, TcpSocket;
 		import ssl.socket;
@@ -276,12 +279,18 @@ final class Bot
 		client.userName = userName;
 		client.realName = realName;
 
-		client.connect(address);
+		client.connect(address, serverPassword);
 
 		eventLoop.add(client);
 		eventHandlers ~= client;
 
 		return client;
+	}
+
+	/// Ditto
+	IrcClient connect(string url)
+	{
+		return connect(url, null);
 	}
 
 	/**
