@@ -126,7 +126,7 @@ struct Command
 
 			Args args;
 
-			enum firstDefaultArg = computeFirstDefaultArg!(defaultArgs);
+			enum firstDefaultArg = computeFirstDefaultArg!defaultArgs;
 			enum hasDefaultArgs = firstDefaultArg != -1;
 
 			static immutable expectedMoreArgsMsg = hasDefaultArgs || isVariadic?
@@ -153,11 +153,14 @@ struct Command
 				alias defaultArg = defaultArgs[i];
 
 				static if(is(defaultArg == void))
-					enforceEx!CommandArgumentException(!strArgs.empty,
-						format(expectedMoreArgsMsg,
-							i,
-							hasDefaultArgs? firstDefaultArg : args.length,
-							primaryName));
+				{
+					static if(!(isLastArgument && isVariadic)) // Variadic arguments can be empty
+						enforceEx!CommandArgumentException(!strArgs.empty,
+							format(expectedMoreArgsMsg,
+								i,
+								hasDefaultArgs? firstDefaultArg : args.length - isVariadic,
+								primaryName));
+				}
 				else
 				{
 					if(strArgs.empty)
