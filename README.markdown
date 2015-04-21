@@ -1,4 +1,4 @@
-Diggler
+Diggler [![dub](https://img.shields.io/dub/v/dirk.svg)](http://code.dlang.org/packages/diggler)
 ============================================
 Diggler is an IRC bot framework for the D programming language.
 
