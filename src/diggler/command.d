@@ -368,7 +368,8 @@ interface ICommandSet
  *
  * Commands are implemented by adding public, non-static methods
  * to the derived class. Non-public or static methods of the derived
- * class are ignored.
+ * class are ignored, as well as methods with the
+ * $(DPREF attribute, ignore) attribute.
  *
  * The name of the method becomes the primary name
  * through which the command is invoked in chat. Other names may be added
@@ -429,7 +430,8 @@ abstract class CommandSet(T) : ICommandSet
 				__traits(compiles, __traits(getMember, T, memberName)) && // ahem...
 				__traits(getProtection, __traits(getMember, T, memberName)) == "public" &&
 				isSomeFunction!(mixin("T." ~ memberName)) &&
-				!__traits(isStaticFunction, mixin("T." ~ memberName)))
+				!__traits(isStaticFunction, mixin("T." ~ memberName)) &&
+				!hasAttribute!(mixin("T." ~ memberName), ignore))
 			{
 				auto dg = &mixin("cmdSet." ~ memberName);
 				auto cmd = Command.create!(mixin("T." ~ memberName))(dg);

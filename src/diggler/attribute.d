@@ -63,3 +63,11 @@ struct admin {}
  * value of the $(DPREF bot, Bot.allowPMCommands) property.
  */
 struct channelOnly {}
+
+/**
+ * Command attribute.
+ *
+ * Methods with this attribute are not treated as commands
+ * even if they are public.
+ */
+struct ignore {}
