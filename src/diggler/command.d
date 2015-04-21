@@ -338,7 +338,7 @@ interface ICommandSet
 {
 	/// Human-readable categorical name for the
 	/// commands in the set.
-	/// See_Also: $(DPREF attribute, category)
+	/// See_Also: $(DPREF attribute, _category)
 	string category() @property @safe pure nothrow;
 
 	/**
