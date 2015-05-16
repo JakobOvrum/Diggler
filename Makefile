@@ -35,12 +35,12 @@ clean:
 SRC__SOURCES = \
 	src/diggler/attribute.d \
 	src/diggler/bot.d \
-	src/diggler/bottracker.d \
 	src/diggler/command.d \
 	src/diggler/commandqueue.d \
 	src/diggler/context.d \
 	src/diggler/defaultcommands.d \
 	src/diggler/eventloop.d \
+	src/diggler/tracker.d \
 	src/diggler/util.d
 
 SOURCES = $(SRC__SOURCES)
