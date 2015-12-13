@@ -335,7 +335,7 @@ final class Bot
 		{
 			import std.algorithm : cmp;
 			auto diff = cmp(nickName, other.nickName);
-			return diff == 0 ? cmp(accountName, other.accountName) : diff;
+			return diff == 0? cmp(accountName, other.accountName) : diff;
 		}
 	}
 
@@ -346,16 +346,22 @@ final class Bot
 	 */
 	void addAdmins(Range)(Range admins) if(isInputRange!Range && is(Unqual!(ElementType!Range) == Admin))
 	{
-		auto sortedAdminList = adminList.assumeSorted();
-
 		for(; !admins.empty; admins.popFront())
 		{
+			auto sortedAdminList = adminList.assumeSorted!((a, b) => a.accountName < b.accountName);
+
 			Admin newAdmin = admins.front;
-			auto lowerBound = sortedAdminList.lowerBound(newAdmin);
-			if(lowerBound.length == adminList.length || lowerBound.front != newAdmin)
+			auto accountSearch = sortedAdminList.trisect(newAdmin);
+			if(accountSearch[1].empty) // No admin with this account
+				adminList.insertInPlace(accountSearch[0].length, newAdmin);
+			else
 			{
-				auto pivot = lowerBound.length;
-				adminList.insertInPlace(pivot, newAdmin);
+				auto nickSearch = accountSearch[1].release
+					.assumeSorted!((a, b) => a.nickName < b.nickName)
+					.trisect(newAdmin);
+
+				if(nickSearch[1].empty) // Admin not yet associated with this nick
+					adminList.insertInPlace(accountSearch[0].length + nickSearch[0].length, newAdmin);
 			}
 		}
 	}
@@ -379,8 +385,6 @@ final class Bot
 
 unittest
 {
-	import std.algorithm : canFind;
-
 	Bot.Configuration conf;
 	conf.nickName = "test";
 	conf.userName = "test";
@@ -388,10 +392,13 @@ unittest
 	conf.commandPrefix = "!";
 	auto bot = new Bot(conf);
 
-	bot.addAdmins(Bot.Admin("test", "Test"));
-	assert(bot.adminList == [Bot.Admin("test", "Test")]);
-	bot.addAdmins(Bot.Admin("test", "Test"), Bot.Admin("other", "Other"), Bot.Admin("test", "Test"));
-	assert(bot.adminList == [Bot.Admin("other", "Other"), Bot.Admin("test", "Test")]);
-	bot.addAdmins([Bot.Admin("other", "Test")]);
-	assert(bot.adminList == [Bot.Admin("other", "Other"), Bot.Admin("other", "Test"), Bot.Admin("test", "Test")]);
+	bot.addAdmins(Bot.Admin("bNick", "bAccount"));
+	assert(bot.adminList == [Bot.Admin("bNick", "bAccount")]);
+	bot.addAdmins(Bot.Admin("bNick", "bAccount"), Bot.Admin("aNick", "aAccount"), Bot.Admin("bNick", "bAccount"));
+	assert(bot.adminList == [Bot.Admin("aNick", "aAccount"), Bot.Admin("bNick", "bAccount")]);
+	bot.addAdmins([Bot.Admin("aNick", "bAccount")]);
+	assert(bot.adminList == [Bot.Admin("aNick", "aAccount"), Bot.Admin("aNick", "bAccount"), Bot.Admin("bNick", "bAccount")]);
+	bot.addAdmins(Bot.Admin("aNick", "aAccount"));
+	assert(bot.adminList == [Bot.Admin("aNick", "aAccount"), Bot.Admin("aNick", "bAccount"), Bot.Admin("bNick", "bAccount")]);
 }
+
