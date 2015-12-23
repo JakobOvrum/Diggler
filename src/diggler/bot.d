@@ -148,6 +148,13 @@ final class Bot
 		deprecated alias nick = nickName;
 	}
 
+	enum HelpCommand
+	{
+		none,
+		simple,
+		categorical
+	}
+
 	/**
 	 * Create a new bot with the given configuration.
 	 *
@@ -155,14 +162,14 @@ final class Bot
 	 * by the given event loop. Otherwise, the bot shares a default
 	 * event loop with all other bots created in the same thread.
 	 */
-	this(Configuration conf, string file = __FILE__, size_t line = __LINE__)
+	this(Configuration conf, HelpCommand help = HelpCommand.categorical, string file = __FILE__, size_t line = __LINE__)
 	{
 		import diggler.eventloop : defaultEventLoop;
-		this(conf, defaultEventLoop, file, line);
+		this(conf, defaultEventLoop, help, file, line);
 	}
 
 	/// Ditto
-	this(Configuration conf, IrcEventLoop eventLoop, string file = __FILE__, size_t line = __LINE__)
+	this(Configuration conf, IrcEventLoop eventLoop, HelpCommand help = HelpCommand.categorical, string file = __FILE__, size_t line = __LINE__)
 	{
 		this._eventLoop = eventLoop;
 
@@ -173,7 +180,8 @@ final class Bot
 
 		this._commandQueue = new CommandQueue();
 
-		registerCommands(new DefaultCommands(this));
+		if(help != HelpCommand.none)
+			registerCommands(new DefaultCommands(this, help));
 	}
 
 	/// Boolean whether or not command invocations are allowed in private messages.
