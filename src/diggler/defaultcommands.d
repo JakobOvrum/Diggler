@@ -24,7 +24,7 @@ final class DefaultCommands : ICommandSet
 	void help(string commandName = null)
 	{
 		import std.array;
-		import std.algorithm : filter, map, joiner, reduce, sort;
+		import std.algorithm : filter, map, splitter, joiner, reduce, sort;
 		import std.range : chain;
 		import irc.util : values;
 		import diggler.util : pluralize;
@@ -68,10 +68,28 @@ final class DefaultCommands : ICommandSet
 		}
 		else
 		{
+			outer_loop:
 			foreach(cmdSet; bot.commandSets)
 			{
-				if(auto cmd = cmdSet.getCommand(commandName))
+				auto parts = commandName.splitter(" ");
+				if(auto cmd = cmdSet.getCommand(parts.front))
 				{
+					parts.popFront();
+					next_part:
+					foreach(part; parts)
+					{
+						//Iterate through every part of commandName looking for a handler command
+						foreach(ref c; cmd.subCommands)
+						{
+							if(c.name == part)
+							{
+								cmd = &c;
+								continue next_part;
+							}
+						}
+						continue outer_loop;
+					}
+
 					auto names = values(cmd.name)
 						.chain(cmd.aliases)
 						.joiner("|");
@@ -92,7 +110,10 @@ final class DefaultCommands : ICommandSet
 					else
 						flags = "";
 
-					reply(`%s %s: %s%s`, names, paramSummary, description, flags);
+					if(cmd.subCommands.length)
+						reply(`%s (%s) %s: %s%s`, names, cmd.subCommands.map!(c => c.name).joiner("|"), paramSummary, description, flags);
+					else
+						reply(`%s %s: %s%s`, names, paramSummary, description, flags);
 
 					return; // Shouldn't be any duplicates
 				}

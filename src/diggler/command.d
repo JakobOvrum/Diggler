@@ -39,6 +39,8 @@ struct Command
 	string name;
 	string[] aliases;
 	string usage;
+	Command[] subCommands;
+	Command* eponymousCommand;
 
 	static struct ParameterInfo
 	{
@@ -422,16 +424,130 @@ abstract class CommandSet(T) : ICommandSet
 
 	final void registerCommands(T cmdSet)
 	{
-		foreach(memberName; __traits(derivedMembers, T))
+		import diggler.std_backport.meta : staticSort;
+		import std.meta : Filter;
+		import std.algorithm : canFind, commonPrefix, joiner, splitter;
+		import std.string : startsWith, endsWith;
+		import std.range : take, walkLength;
+		import std.conv : to;
+
+		static if(__traits(hasMember, T, "subCommandSeparator"))
 		{
-			static if(
-				memberName != "__ctor" &&
-				memberName != "__dtor" &&
-				__traits(compiles, __traits(getMember, T, memberName)) && // ahem...
-				__traits(getProtection, __traits(getMember, T, memberName)) == "public" &&
-				isSomeFunction!(mixin("T." ~ memberName)) &&
-				!__traits(isStaticFunction, mixin("T." ~ memberName)) &&
-				!hasAttribute!(mixin("T." ~ memberName), ignore))
+			//The separator is strictly a string: any other type will halt compilation
+			static assert(is(typeof(T.subCommandSeparator) == string), "subCommandSeparator must be of type string, not " ~ typeof(T.subCommandSeparator).stringof);
+			enum cmdSep = T.subCommandSeparator;
+		}
+		else
+		{
+			enum cmdSep = "_";
+		}
+
+		//Determines whether a given symbol name is a valid command
+		template isCommand(string symbol){
+			static if(__traits(getProtection, __traits(getMember, T, symbol)) != "public")
+				enum isCommand = false;
+			else
+				enum isCommand =
+					symbol != "__ctor" &&
+					symbol != "__dtor" &&
+					__traits(compiles, __traits(getMember, T, symbol)) && // ahem...
+					isSomeFunction!(__traits(getMember, T, symbol)) &&
+					!__traits(isStaticFunction, __traits(getMember, T, symbol)) &&
+					!hasAttribute!(__traits(getMember, T, symbol), ignore);
+		}
+
+		//Filters a sorted sequence by prefix, e.g. prefixFilter!("a", "a_b", "a_b_c", "d_e_f") yields AliasSeq!("a_b", "a_b_c")
+		template prefixFilter(string prefix, sequence...)
+		{
+			template prefixFilterImpl(size_t pos, seq...)
+			{
+				static if(pos >= seq.length || !seq[pos].startsWith(prefix))
+					alias prefixFilterImpl = seq[0..pos];
+				else
+					alias prefixFilterImpl = prefixFilterImpl!(pos+1, seq);
+			}
+
+			alias prefixFilter = prefixFilterImpl!(0, sequence);
+		}
+
+		//Basic template to get the first part of a subcommand, e.g. rootCmd("a_b_c") is "a"
+		enum rootCmd(string name) = name.splitter(cmdSep).front;
+		//Count how "deep" a subcommand is, e.g. depth("a_b_c") is 3
+		enum depth(string name) = name.splitter(cmdSep).walkLength;
+
+		//Sort all of the valid commands in T
+		enum sortingFunc(string left, string right) = left < right;
+		alias sortedMembers = staticSort!(sortingFunc, Filter!(isCommand, __traits(derivedMembers, T)));
+
+		foreach(index, memberName; sortedMembers)
+		{
+			//Captures a subcommand
+			static if(!memberName.startsWith(cmdSep) && //Starting with cmdSep will cause problems
+				  (memberName.canFind(cmdSep) || //A subcommand either contains cmdSep, or is next to another command with the same rootCmd
+					((index + 1) < sortedMembers.length &&
+					 memberName.splitter(cmdSep).front == sortedMembers[index+1].splitter(cmdSep).front)))
+			{
+				//Ensure we havent already built a handler for this subcommand yet
+				static if(!(index && rootCmd!(sortedMembers[index-1]) == rootCmd!(memberName)))
+				{
+					Command createHandler(string prefix, members...)()
+					{
+						//A prefix ending with the command separator will produce an unusable command, fail if we find it
+						static assert(!prefix.endsWith(cmdSep), "Command " ~ prefix ~ " cannot end with the command separator");
+
+						Command handler;
+						auto dg = (string s = null)
+						{
+							foreach(ref c; handler.subCommands)
+							{
+								if(s && s.splitter(" ").front == c.name) //prevent accidentally matching "void baz_foo(string)" with !baz foobar
+								{
+									if(!c.adminOnly || context.isAdmin(cast(string)context.user.nickName))
+										c.handler(s? s[c.name.length .. $] : null);
+									return;
+								}
+							}
+							static if(__traits(hasMember, T, prefix) && isCommand!prefix)
+								handler.eponymousCommand.handler(s);
+						};
+						handler = Command.create!((string s = null){})(dg);
+						foreach(part; prefix.splitter(cmdSep))
+							handler.name = part; //effectively prefix.splitter(cmdSep).back, replace with .tail(1).front when available
+
+						alias subCmds = prefixFilter!(prefix, members);
+						foreach(subIndex, subMember; subCmds)
+						{
+							//We should skip if the current member is the same as our prefix, or we have already built a handler for this command
+							static if(prefix != subMember &&
+								  !(subIndex &&
+								    depth!subMember > depth!prefix + 1 &&
+								    depth!(commonPrefix(subCmds[subIndex - 1], subMember)) >= depth!prefix))
+							{
+								enum next = subMember.splitter(cmdSep).take(depth!prefix+1).joiner(cmdSep).array.to!string;
+								static if(depth!prefix + 1 == depth!subMember)
+									handler.subCommands ~= createHandler!(next, prefixFilter!(next, members[subIndex+1 .. $]));
+								else
+									handler.subCommands ~= createHandler!(next, members);
+							}
+						}
+						//This is where the actual function gets turned into a Command object
+						static if(__traits(hasMember, T, prefix) && isCommand!prefix)
+						{
+							//Allocate heap memory and copy the new command onto that (&Command.create(...) will cause problems)
+							*(handler.eponymousCommand = new Command) = Command.create!(mixin("T." ~ prefix))(&mixin("cmdSet." ~ prefix));
+							//Copy across info for the help command
+							handler.usage = handler.eponymousCommand.usage;
+							handler.parameterInfo = handler.eponymousCommand.parameterInfo;
+						}
+
+ 						return handler;
+					}
+
+					auto cmd = createHandler!(rootCmd!memberName, prefixFilter!(rootCmd!memberName, sortedMembers[index .. $]));
+					add(cmd);
+				}
+			}
+			else
 			{
 				auto dg = &mixin("cmdSet." ~ memberName);
 				auto cmd = Command.create!(mixin("T." ~ memberName))(dg);
