@@ -25,7 +25,8 @@ final class DefaultCommands : ICommandSet
 	{
 		import std.array;
 		import std.algorithm : filter, map, joiner, reduce, sort;
-		import std.range : chain;
+		import std.range : chain, only, zip;
+		import std.format : format;
 		import irc.util : values;
 		import diggler.util : pluralize;
 
@@ -82,13 +83,14 @@ final class DefaultCommands : ICommandSet
 
 					immutable description = cmd.usage? cmd.usage : "no description available.";
 
+					static immutable flagList = ["channel", "admin", "identified"];
 					string flags;
-					if(cmd.channelOnly && cmd.adminOnly)
-						flags = " [channel, admin]";
-					else if(cmd.channelOnly)
-						flags = " [channel]";
-					else if(cmd.adminOnly)
-						flags = " [admin]";
+					auto list = zip(flagList, only(cmd.channelOnly, cmd.adminOnly, cmd.identifiedOnly))
+							.filter!(t => t[1])
+							.map!(t => t[0]);
+
+					if(!list.empty)
+						flags = format(" [%-(%s, %)]", list);
 					else
 						flags = "";
 

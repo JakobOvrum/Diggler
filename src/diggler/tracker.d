@@ -7,8 +7,9 @@ import irc.tracker;
 struct UserInfo
 {
 	mixin(bitfields!(
-		bool, "isAdmin", 1,
-		ubyte, "padding", 7
+		bool, "isIdentified", 1,
+		bool, "isInvalidated", 1,
+		ubyte, "padding", 6
 	));
 }
 

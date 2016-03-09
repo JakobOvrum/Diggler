@@ -199,42 +199,67 @@ struct Context
 
 		if(auto user = tracker.findUser(nickName))
 		{
-			if(user.payload.isAdmin)
+			if(user.payload.isIdentified && !user.payload.isInvalidated)
 				return true;
 
-			auto curFiber = _bot.commandQueue.fiber();
-			bool result = false;
+			string accountName = getAccountName(nickName);
+			if(accountName is null)
+				return false;
 
-			void onWhoisAccountReply(in char[] nick, in char[] accountName)
-			{
-				if(nick == nickName)
-				{
-					_client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
-					auto sortedAdminList = bot.adminList.assumeSorted!((a, b) => a.nickName < b.nickName)();
-					result = sortedAdminList.contains(Bot.Admin(nickName, cast(immutable)accountName));
-					_bot.eventLoop.wakeFiber(curFiber);
-				}
-			}
-
-			void onWhoisEnd(in char[] nick)
-			{
-				if(nick == nickName)
-				{
-					_client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
-					_client.onWhoisEnd.unsubscribeHandler(&onWhoisEnd);
-					_bot.eventLoop.wakeFiber(curFiber);
-				}
-			}
-
-			_client.onWhoisAccountReply ~= &onWhoisAccountReply;
-			_client.onWhoisEnd ~= &onWhoisEnd;
-			_client.queryWhois(nickName);
-			curFiber.yield();
-
-			return result;
+			user.payload.isIdentified = sortedAdminList.contains(Bot.Admin(nickName, cast(immutable)accountName));
+			user.payload.isInvalidated = false;
+			return user.payload.isIdentified;
 		}
 		else
 			return false;
+	}
+
+	bool isIdentified(string nickName)
+	{
+		if(auto user = tracker.findUser(nickName))
+		{
+			if(user.payload.isIdentified && !user.payload.isInvalidated)
+				return true;
+
+			string accountName = getAccountName(nickName);
+			user.payload.isIdentified = nickName == accountName;
+			user.payload.isInvalidated = false;
+			return user.payload.isIdentified;
+		}
+		else
+			return false;
+	}
+
+	string getAccountName(string nickName)
+	{
+		auto curFiber = _bot.commandQueue.fiber();
+		string result = null;
+
+		void onWhoisAccountReply(in char[] nick, in char[] accountName)
+		{
+			if(nickName == nick)
+			{
+				result = accountName.idup;
+				_client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
+			}
+		}
+
+		void onWhoisEnd(in char[] nick)
+		{
+			if(nickName == nick)
+			{
+				_client.onWhoisAccountReply.unsubscribeHandler(&onWhoisAccountReply);
+				_client.onWhoisEnd.unsubscribeHandler(&onWhoisEnd);
+				_bot.eventLoop.wakeFiber(curFiber);
+			}
+		}
+
+		_client.onWhoisAccountReply ~= &onWhoisAccountReply;
+		_client.onWhoisEnd ~= &onWhoisEnd;
+		_client.queryWhois(nickName);
+		curFiber.yield();
+
+		return result;
 	}
 
 	/**

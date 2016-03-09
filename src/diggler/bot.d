@@ -62,8 +62,16 @@ final class Bot
 			this.tracker = new BotTracker(this);
 			this.tracker.start();
 
+			super.onNickChange ~= &invalidate;
 			super.onConnect ~= &handleConnect;
 			super.onMessage ~= &handleMessage;
+		}
+
+		void invalidate(IrcUser user, in char[] nick)
+		{
+			// mark a user for re-identification if they change nick
+			if(auto trackedUser = tracker.findUser(nick))
+				trackedUser.payload.isInvalidated = true;
 		}
 
 		void handleConnect()
@@ -112,7 +120,8 @@ final class Bot
 				auto ctx = Context(this.outer, this, tracker, replyTarget, immUser, isPm);
 
 				commandQueue.post(cmdSet, ctx, () {
-					if(cmd.adminOnly && !ctx.isAdmin(immNick))
+					if(cmd.adminOnly && !ctx.isAdmin(immNick) ||
+					   cmd.identifiedOnly && !ctx.isIdentified(immNick))
 						return;
 
 					try cmd.handler(cmdArgs);
