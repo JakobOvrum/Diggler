@@ -58,6 +58,15 @@ struct admin {}
 /**
  * Command attribute.
  *
+ * Methods with this attribute can only be called by a user
+ * that is registered with services, meaning they are the
+ * owner of that particular nickname.
+ */
+struct identified {}
+
+/**
+ * Command attribute.
+ *
  * Commands for command methods with attribute cannot be
  * invoked in private messages, regardless of the
  * value of the $(DPREF bot, Bot.allowPMCommands) property.

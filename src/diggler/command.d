@@ -96,6 +96,7 @@ struct Command
 
 	ParameterInfo[] parameterInfo;
 	bool adminOnly = false;
+	bool identifiedOnly = false;
 	bool channelOnly = false;
 	bool variadic = false;
 
@@ -213,6 +214,9 @@ struct Command
 
 		static if(hasAttribute!(handler, .admin))
 			cmd.adminOnly = true;
+
+		static if(hasAttribute!(handler, .identified))
+			cmd.identifiedOnly = true;
 
 		static if(hasAttribute!(handler, .channelOnly))
 			cmd.channelOnly = true;
